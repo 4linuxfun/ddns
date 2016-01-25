@@ -48,11 +48,14 @@ R_modify(){
 	fi
 }
 
-domain_id=$(D_id)
-R_info
-record_id=$(cat /root/tmp.txt|grep id|awk -F'[<>]' '{print $3}')
-record_type=$(cat /root/tmp.txt|grep type|awk -F'[<>]' '{print $3}')
-R_modify 
+domain_ids=$(D_id)
+for domain_id in $domain_ids
+do
+	echo $domain_id
+	R_info $domain_id
+	record_id=$(cat tmp.txt|grep id|awk -F'[<>]' '{print $3}')
+	record_type="A"
+	R_modify $domain_id
 
-rm -rf /root/tmp.txt
-
+	rm -rf tmp.txt
+done
