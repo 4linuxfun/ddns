@@ -32,14 +32,14 @@ fi
 
 #获取record.list信息
 R_info(){
-	curl -A ${userAgent} -X POST ${common_url}/Record.List -d "${common_post}&domain_id=${domain_id}">/root/record_info.txt
+	curl -A ${userAgent} -X POST ${common_url}/Record.List -d "${common_post}&domain_id=$1">/root/record_info.txt
 	cat /root/record_info.txt|grep -B2 -A12 ${record_name}>/root/tmp.txt
 	rm -rf /root/record_info.txt
 }
 
 #修改record.modify信息
 R_modify(){
-	curl -A ${userAgent} -X POST ${common_url}/Record.Modify -d "${common_post}&domain_id=${domain_id}&record_id=${record_id}&sub_domain=${record_name}&value=${new_ip}&record_type=${record_type}&record_line=默认">/root/modify.txt
+	curl -A ${userAgent} -X POST ${common_url}/Record.Modify -d "${common_post}&domain_id=$1&record_id=${record_id}&sub_domain=${record_name}&value=${new_ip}&record_type=${record_type}&record_line=默认">/root/modify.txt
 	if cat /root/modify.txt|grep -i "fail";then
 		echo "error...please check /root/modify.txt for more information"
 		exit 1
@@ -49,13 +49,12 @@ R_modify(){
 }
 
 domain_ids=$(D_id)
-for domain_id in $domain_ids
+for d_id in $domain_ids
 do
-	echo $domain_id
-	R_info $domain_id
-	record_id=$(cat tmp.txt|grep id|awk -F'[<>]' '{print $3}')
-	record_type="A"
-	R_modify $domain_id
+	R_info $d_id
+	record_id=$(cat tmp.txt|grep id|awk -F'[<>]' '{print $3}'|head -n 1)
+	record_type="A"  #$(cat tmp.txt|grep type|awk -F'[<>]' '{print $3}')
+	R_modify $d_id
 
 	rm -rf tmp.txt
 done
